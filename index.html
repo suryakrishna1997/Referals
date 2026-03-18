@@ -317,25 +317,178 @@
   .empty svg { margin-bottom: 12px; opacity: .4; }
   .empty p { font-size: 15px; }
 
-  /* ── TOAST ── */
-  .toast {
+  /* ── MODAL OVERLAY ── */
+  .modal-overlay {
     position: fixed;
-    bottom: 28px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--accent);
-    color: #000;
-    font-weight: 600;
-    font-size: 13px;
-    padding: 12px 22px;
-    border-radius: 10px;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     opacity: 0;
     pointer-events: none;
-    transition: all .3s;
-    z-index: 1000;
-    white-space: nowrap;
+    transition: opacity .25s;
   }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .modal-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ── MODAL BOX ── */
+  .modal {
+    background: var(--card);
+    border: 1px solid rgba(0,229,192,.25);
+    border-radius: 20px;
+    padding: 36px 32px 28px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    transform: translateY(24px) scale(.96);
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+    box-shadow: 0 32px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(0,229,192,.1);
+  }
+  .modal-overlay.show .modal {
+    transform: translateY(0) scale(1);
+  }
+
+  .modal-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(0,229,192,.12);
+    border: 1px solid rgba(0,229,192,.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+  }
+
+  .modal-role {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .modal h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  .modal p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 22px;
+  }
+
+  .modal-email {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(0,229,192,.07);
+    border: 1px solid rgba(0,229,192,.25);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 22px;
+  }
+
+  .modal-email span {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--accent);
+    letter-spacing: .01em;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-copy {
+    flex: 1;
+    background: rgba(0,229,192,.1);
+    border: 1px solid rgba(0,229,192,.3);
+    border-radius: 10px;
+    color: var(--accent);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 11px 16px;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn-copy:hover {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+  }
+
+  .btn-mail {
+    flex: 1;
+    background: rgba(79,142,247,.1);
+    border: 1px solid rgba(79,142,247,.3);
+    border-radius: 10px;
+    color: #4f8ef7;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 11px 16px;
+    text-decoration: none;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn-mail:hover {
+    background: #4f8ef7;
+    color: #fff;
+    border-color: #4f8ef7;
+  }
+
+  .btn-close {
+    position: absolute;
+    top: 14px; right: 14px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    cursor: pointer;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: all .2s;
+    line-height: 1;
+  }
+  .btn-close:hover { background: rgba(255,255,255,.1); color: var(--text); }
+
+  .copied-badge {
+    display: none;
+    font-size: 12px;
+    color: var(--accent);
+    margin-top: 10px;
+    font-weight: 600;
+  }
+  .copied-badge.show { display: block; }
 
   /* ── REGION DIVIDER ── */
   .region-divider {
@@ -373,7 +526,7 @@
 <body>
 
 <header>
-  <div class="badge">🚀 We're Hiring</div>
+  <div class="badge">🚀 KPIT is Hiring for MULTIPLE Positions in INDIA and USA</div>
   <h1>Open Positions</h1>
   <p class="subtitle">Explore opportunities across engineering, legal, and business functions. Refer a friend and grow together.</p>
 </header>
@@ -393,12 +546,12 @@
   <button class="filter-btn" data-filter="usa">🇺🇸 USA</button>
 </div>
 
-<div class="count-bar" id="countBar">Showing <span id="countNum">32</span> of 32 positions</div>
+<div class="count-bar" id="countBar">Showing <span id="countNum">31</span> of 31 positions</div>
 
 <div class="grid" id="grid">
 
   <!-- 1 -->
-  <div class="card" data-cat="legal" data-text="sr lead legal counsel legal drafting contract review pune">
+  <div class="card" data-cat="legal" data-region="india" data-text="sr lead legal counsel legal drafting contract review pune">
     <span class="cat cat-legal">⚖️ Legal</span>
     <div class="role">Sr. Lead Legal Counsel</div>
     <div class="meta">
@@ -416,7 +569,7 @@
   </div>
 
   <!-- 2 -->
-  <div class="card" data-cat="biz" data-text="marketing specialist technology marketing account-based marketing pune">
+  <div class="card" data-cat="biz" data-region="india" data-text="marketing specialist technology marketing account-based marketing pune">
     <span class="cat cat-biz">📣 Marketing</span>
     <div class="role">Marketing Specialist</div>
     <div class="meta">
@@ -434,7 +587,7 @@
   </div>
 
   <!-- 3 -->
-  <div class="card" data-cat="tech" data-text="devops azure aws cloud specialist ci/cd pipeline pune">
+  <div class="card" data-cat="tech" data-region="india" data-text="devops azure aws cloud specialist ci/cd pipeline pune">
     <span class="cat cat-tech">☁️ DevOps</span>
     <div class="role">DevOps (Azure, AWS Cloud) Specialist</div>
     <div class="meta">
@@ -446,14 +599,14 @@
       <span class="skill">DevOps</span>
       <span class="skill">CI/CD Pipeline</span>
     </div>
-    <a class="refer-btn" href="#" onclick="refer(event,'DevOps Specialist')">
+    <a class="refer-btn" href="#" onclick="refer(event,'DevOps (Azure, AWS Cloud) Specialist')">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
       Refer a Friend
     </a>
   </div>
 
   <!-- 4 -->
-  <div class="card" data-cat="biz" data-text="pricing specialist ca pricing pune">
+  <div class="card" data-cat="biz" data-region="india" data-text="pricing specialist ca pricing pune">
     <span class="cat cat-biz">💰 Finance</span>
     <div class="role">Pricing Specialist</div>
     <div class="meta">
@@ -471,7 +624,7 @@
   </div>
 
   <!-- 5 -->
-  <div class="card" data-cat="adas" data-text="adas adaptive autosar architect c++ qnx bsp stl linux bangalore pune">
+  <div class="card" data-cat="adas" data-region="india" data-text="adas adaptive autosar architect c++ qnx bsp stl linux bangalore pune">
     <span class="cat cat-adas">🚗 ADAS</span>
     <div class="role">ADAS — Adaptive AUTOSAR Architect</div>
     <div class="meta">
@@ -493,7 +646,7 @@
   </div>
 
   <!-- 6 -->
-  <div class="card" data-cat="adas" data-text="adas classic autosar architect bsw os vector bangalore pune">
+  <div class="card" data-cat="adas" data-region="india" data-text="adas classic autosar architect bsw os vector bangalore pune">
     <span class="cat cat-adas">🚗 ADAS</span>
     <div class="role">ADAS — Classic AUTOSAR Architect</div>
     <div class="meta">
@@ -513,7 +666,7 @@
   </div>
 
   <!-- 7 -->
-  <div class="card" data-cat="tech" data-text="security operation analyst l2 mcafee trellix ens dlp palo alto cortex pune">
+  <div class="card" data-cat="tech" data-region="india" data-text="security operation analyst l2 mcafee trellix ens dlp palo alto cortex pune">
     <span class="cat cat-tech">🔒 Security</span>
     <div class="role">Security Operations Analyst — L2</div>
     <div class="meta">
@@ -532,7 +685,7 @@
   </div>
 
   <!-- 8 -->
-  <div class="card" data-cat="tech" data-text="networking cloud engineer aws azure pune">
+  <div class="card" data-cat="tech" data-region="india" data-text="networking cloud engineer aws azure pune">
     <span class="cat cat-tech">🌐 Networking</span>
     <div class="role">Networking / Cloud Engineer</div>
     <div class="meta">
@@ -550,7 +703,7 @@
   </div>
 
   <!-- 9 -->
-  <div class="card" data-cat="biz" data-text="pre-sales consultant bid proposal management rfq pune">
+  <div class="card" data-cat="biz" data-region="india" data-text="pre-sales consultant bid proposal management rfq pune">
     <span class="cat cat-biz">🤝 Pre-Sales</span>
     <div class="role">Pre-Sales Consultant</div>
     <div class="meta">
@@ -569,7 +722,7 @@
   </div>
 
   <!-- 10 -->
-  <div class="card" data-cat="ops" data-text="procurement specialist procure to pay pune">
+  <div class="card" data-cat="ops" data-region="india" data-text="procurement specialist procure to pay pune">
     <span class="cat cat-ops">📦 Procurement</span>
     <div class="role">Procurement Specialist</div>
     <div class="meta">
@@ -587,7 +740,7 @@
   </div>
 
   <!-- 11 -->
-  <div class="card" data-cat="adas" data-text="adas ai ml system development c++ python pytorch gpu embedded bangalore pune">
+  <div class="card" data-cat="adas" data-region="india" data-text="adas ai ml system development c++ python pytorch gpu embedded bangalore pune">
     <span class="cat cat-adas">🤖 ADAS · AI/ML</span>
     <div class="role">ADAS AI/ML System Development Expert</div>
     <div class="meta">
@@ -608,7 +761,7 @@
   </div>
 
   <!-- 12 -->
-  <div class="card" data-cat="adas" data-text="adas ai architect ai framework llms python bangalore pune">
+  <div class="card" data-cat="adas" data-region="india" data-text="adas ai architect ai framework llms python bangalore pune">
     <span class="cat cat-adas">🧠 ADAS · AI</span>
     <div class="role">ADAS AI Architect</div>
     <div class="meta">
@@ -630,7 +783,7 @@
   <div class="region-divider"><span>🇮🇳 India — New Openings</span></div>
 
   <!-- 13: ADAS Classic AUTOSAR Architect (updated) -->
-  <div class="card" data-cat="adas" data-text="adas classic autosar architect bsw os vector bangalore pune">
+  <div class="card" data-cat="adas" data-region="india" data-text="adas classic autosar architect bsw os vector bangalore pune">
     <span class="cat cat-adas">🚗 ADAS</span>
     <div class="role">ADAS — Classic AUTOSAR Architect</div>
     <div class="meta">
@@ -650,7 +803,7 @@
   </div>
 
   <!-- 14: ADAS Front-End Engineer -->
-  <div class="card" data-cat="adas" data-text="adas front-end engineer ai html5 css3 ui ux design ci/cd typescript bangalore pune">
+  <div class="card" data-cat="adas" data-region="india" data-text="adas front-end engineer ai html5 css3 ui ux design ci/cd typescript bangalore pune">
     <span class="cat cat-adas">🚗 ADAS · Frontend</span>
     <div class="role">ADAS Front-End Engineer</div>
     <div class="meta">
@@ -672,7 +825,7 @@
   </div>
 
   <!-- 15: ADAS Data Dog Backend Engineer -->
-  <div class="card" data-cat="adas" data-text="adas datadog backend engineer python docker aws cloud tableau power bi bangalore pune">
+  <div class="card" data-cat="adas" data-region="india" data-text="adas datadog backend engineer python docker aws cloud tableau power bi bangalore pune">
     <span class="cat cat-adas">🚗 ADAS · Backend</span>
     <div class="role">ADAS DataDog Backend Engineer</div>
     <div class="meta">
@@ -693,7 +846,7 @@
   </div>
 
   <!-- 16: Middleware AUTOSAR Security -->
-  <div class="card" data-cat="middleware" data-text="middleware autosar security csm secoc bangalore">
+  <div class="card" data-cat="middleware" data-region="india" data-text="middleware autosar security csm secoc bangalore">
     <span class="cat cat-mid">🔐 Middleware</span>
     <div class="role">Middleware (SA) AUTOSAR Security</div>
     <div class="meta">
@@ -713,7 +866,7 @@
   </div>
 
   <!-- 17: Middleware AUTOSAR Ethernet -->
-  <div class="card" data-cat="middleware" data-text="middleware autosar ethernet doip some/ip ethernet switch ecu bangalore">
+  <div class="card" data-cat="middleware" data-region="india" data-text="middleware autosar ethernet doip some/ip ethernet switch ecu bangalore">
     <span class="cat cat-mid">🔌 Middleware</span>
     <div class="role">Middleware AUTOSAR Ethernet</div>
     <div class="meta">
@@ -734,7 +887,7 @@
   </div>
 
   <!-- 18: Azure Infrastructure SME -->
-  <div class="card" data-cat="tech" data-text="azure infrastructure sme subject matter expert cloud sole optimus pune">
+  <div class="card" data-cat="tech" data-region="india" data-text="azure infrastructure sme subject matter expert cloud sole optimus pune">
     <span class="cat cat-tech">☁️ Azure</span>
     <div class="role">Azure Infrastructure SME</div>
     <div class="meta">
@@ -752,27 +905,8 @@
     </a>
   </div>
 
-  <!-- 19: ADAS AI Architect (duplicate entry updated) -->
-  <div class="card" data-cat="adas" data-text="adas ai architect ai framework llms python bangalore pune">
-    <span class="cat cat-adas">🧠 ADAS · AI</span>
-    <div class="role">ADAS AI Architect</div>
-    <div class="meta">
-      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>9 – 12 Years</span>
-      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Bangalore / Pune</span>
-    </div>
-    <div class="skills">
-      <span class="skill">AI Frameworks</span>
-      <span class="skill">LLMs</span>
-      <span class="skill">Python</span>
-    </div>
-    <a class="refer-btn" href="#" onclick="refer(event,'ADAS AI Architect')">
-      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-      Refer a Friend
-    </a>
-  </div>
-
   <!-- 20: ADAS Python AWS Backend Lead -->
-  <div class="card" data-cat="adas" data-text="adas python aws backend lead bangalore pune">
+  <div class="card" data-cat="adas" data-region="india" data-text="adas python aws backend lead bangalore pune">
     <span class="cat cat-adas">🚗 ADAS · Backend</span>
     <div class="role">ADAS Python AWS Backend Lead</div>
     <div class="meta">
@@ -790,7 +924,7 @@
   </div>
 
   <!-- 21: Middleware Adaptive AUTOSAR -->
-  <div class="card" data-cat="middleware" data-text="middleware adaptive autosar c++ qnx driveos driver bangalore">
+  <div class="card" data-cat="middleware" data-region="india" data-text="middleware adaptive autosar c++ qnx driveos driver bangalore">
     <span class="cat cat-mid">⚙️ Middleware</span>
     <div class="role">Middleware — Adaptive AUTOSAR</div>
     <div class="meta">
@@ -810,7 +944,7 @@
   </div>
 
   <!-- 22: Middleware Python Test Automation -->
-  <div class="card" data-cat="middleware" data-text="middleware python test automation etl sql api azure autosar bangalore">
+  <div class="card" data-cat="middleware" data-region="india" data-text="middleware python test automation etl sql api azure autosar bangalore">
     <span class="cat cat-mid">🧪 Middleware</span>
     <div class="role">Middleware Python Test Automation</div>
     <div class="meta">
@@ -832,7 +966,7 @@
   </div>
 
   <!-- 23: Azure Infrastructure Specialist -->
-  <div class="card" data-cat="tech" data-text="azure infrastructure specialist ci/cd deployment pune india">
+  <div class="card" data-cat="tech" data-region="india" data-text="azure infrastructure specialist ci/cd deployment pune india">
     <span class="cat cat-tech">☁️ Azure</span>
     <div class="role">Azure Infrastructure Specialist</div>
     <div class="meta">
@@ -850,7 +984,7 @@
   </div>
 
   <!-- 24: Java Expert -->
-  <div class="card" data-cat="tech" data-text="java expert angular spring boot microservices postgresql springboot quarkus pune">
+  <div class="card" data-cat="tech" data-region="india" data-text="java expert angular spring boot microservices postgresql springboot quarkus pune">
     <span class="cat cat-tech">☕ Java</span>
     <div class="role">Java Expert — Angular / Spring Boot / Microservices</div>
     <div class="meta">
@@ -864,7 +998,7 @@
       <span class="skill">Java</span>
       <span class="skill">PostgreSQL</span>
     </div>
-    <a class="refer-btn" href="#" onclick="refer(event,'Java Expert Angular Spring Boot')">
+    <a class="refer-btn" href="#" onclick="refer(event,'Java Expert - Angular / Spring Boot / Microservices')">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
       Refer a Friend
     </a>
@@ -874,7 +1008,7 @@
   <div class="region-divider"><span>🇺🇸 USA Region</span></div>
 
   <!-- 25: US Jobs Requisition -->
-  <div class="card" data-cat="usa" data-text="us jobs vehicle software engineering columbus detroit usa">
+  <div class="card" data-cat="usa" data-region="usa" data-text="us jobs vehicle software engineering columbus detroit usa">
     <span class="cat cat-usa">🇺🇸 USA</span>
     <div class="role">US Jobs Requisition — Employee Referrals</div>
     <div class="meta">
@@ -891,7 +1025,7 @@
   </div>
 
   <!-- 26: Vehicle Network Test Engineer -->
-  <div class="card" data-cat="usa" data-text="vehicle network test engineer system engineer some/ip doip autosar pdu novi mi usa">
+  <div class="card" data-cat="usa" data-region="usa" data-text="vehicle network test engineer system engineer some/ip doip autosar pdu novi mi usa">
     <span class="cat cat-usa">🇺🇸 USA</span>
     <div class="role">Vehicle Network Test Engineer</div>
     <div class="meta">
@@ -911,7 +1045,7 @@
   </div>
 
   <!-- 27: Software Integration Engineer -->
-  <div class="card" data-cat="usa" data-text="software integration engineer qnx linux android c c++ aosp test automation autosar matlab can j1939 hil mil sil auburn hills mi usa">
+  <div class="card" data-cat="usa" data-region="usa" data-text="software integration engineer qnx linux android c c++ aosp test automation autosar matlab can j1939 hil mil sil auburn hills mi usa">
     <span class="cat cat-usa">🇺🇸 USA</span>
     <div class="role">Software Integration Engineer — QNX / Linux / Android</div>
     <div class="meta">
@@ -935,7 +1069,7 @@
   </div>
 
   <!-- 28: Data Migration Hardening -->
-  <div class="card" data-cat="usa" data-text="data migration hardening python java data handling git dearborn mi usa">
+  <div class="card" data-cat="usa" data-region="usa" data-text="data migration hardening python java data handling git dearborn mi usa">
     <span class="cat cat-usa">🇺🇸 USA</span>
     <div class="role">Data Migration Hardening</div>
     <div class="meta">
@@ -955,7 +1089,7 @@
   </div>
 
   <!-- 29: Durability Simulation Engineer -->
-  <div class="card" data-cat="usa" data-text="durability simulation engineer ansa abaqus nastran mbd simulation novi mi usa">
+  <div class="card" data-cat="usa" data-region="usa" data-text="durability simulation engineer ansa abaqus nastran mbd simulation novi mi usa">
     <span class="cat cat-usa">🇺🇸 USA</span>
     <div class="role">Durability Simulation Engineer</div>
     <div class="meta">
@@ -975,7 +1109,7 @@
   </div>
 
   <!-- 30: High Voltage Validation Engineer -->
-  <div class="card" data-cat="usa" data-text="high voltage validation engineer calibration tool matlab simulink auburn hills mi usa">
+  <div class="card" data-cat="usa" data-region="usa" data-text="high voltage validation engineer calibration tool matlab simulink auburn hills mi usa">
     <span class="cat cat-usa">🇺🇸 USA</span>
     <div class="role">High Voltage Validation Engineer</div>
     <div class="meta">
@@ -994,7 +1128,7 @@
   </div>
 
   <!-- 31: Industrial Engineer -->
-  <div class="card" data-cat="usa" data-text="industrial engineer most line balancing kaizens san antonio tx usa">
+  <div class="card" data-cat="usa" data-region="usa" data-text="industrial engineer most line balancing kaizens san antonio tx usa">
     <span class="cat cat-usa">🇺🇸 USA</span>
     <div class="role">Industrial Engineer</div>
     <div class="meta">
@@ -1020,7 +1154,33 @@
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- REFER MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="btn-close" onclick="closeModalDirect()">✕</button>
+    <div class="modal-icon">
+      <svg width="24" height="24" fill="none" stroke="#00e5c0" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+    </div>
+    <div class="modal-role" id="modalRole">Role Name</div>
+    <h2>Send Your Resume</h2>
+    <p>Please send the candidate's resume to the email below. Mention the role in the subject line for faster processing.</p>
+    <div class="modal-email">
+      <svg width="18" height="18" fill="none" stroke="#00e5c0" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span>surya.krishna@kpit.com</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-copy" onclick="copyEmail()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Email
+      </button>
+      <a class="btn-mail" id="mailtoLink" href="#">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Open Mail
+      </a>
+    </div>
+    <div class="copied-badge" id="copiedBadge">✓ Email copied to clipboard!</div>
+  </div>
+</div>
 
 <script>
   const cards = document.querySelectorAll('.card[data-cat]');
@@ -1028,7 +1188,6 @@
   const searchInput = document.getElementById('searchInput');
   const countNum = document.getElementById('countNum');
   const emptyState = document.getElementById('emptyState');
-  const toast = document.getElementById('toast');
 
   let activeFilter = 'all';
   let searchQuery = '';
@@ -1078,11 +1237,34 @@
   function refer(e, role) {
     e.preventDefault();
     e.stopPropagation();
-    navigator.clipboard?.writeText(`Hey! Check out this opening at KPIT: ${role}. Apply / refer here!`).catch(() => {});
-    toast.textContent = `✓ Link copied for "${role}"`;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2800);
+    document.getElementById('modalRole').textContent = role;
+    document.getElementById('mailtoLink').href =
+      `mailto:surya.krishna@kpit.com?subject=Referral: ${encodeURIComponent(role)}&body=Hi Surya,%0A%0APlease find attached the resume for the ${encodeURIComponent(role)} position.%0A%0ARegards,`;
+    document.getElementById('copiedBadge').classList.remove('show');
+    document.getElementById('modalOverlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
   }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+  }
+
+  function closeModalDirect() {
+    document.getElementById('modalOverlay').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  function copyEmail() {
+    navigator.clipboard?.writeText('surya.krishna@kpit.com').catch(() => {});
+    const badge = document.getElementById('copiedBadge');
+    badge.classList.add('show');
+    setTimeout(() => badge.classList.remove('show'), 2500);
+  }
+
+  // Close on Escape key
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModalDirect();
+  });
 </script>
 </body>
 </html>
