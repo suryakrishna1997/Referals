@@ -1267,4 +1267,1273 @@
   });
 </script>
 </body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KPIT — Open Positions</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --card: #161a22;
+    --border: #1e2330;
+    --accent: #00e5c0;
+    --accent2: #4f8ef7;
+    --gold: #f5c842;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --hover-card: #1c2130;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID BG ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,192,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,192,.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: relative;
+    z-index: 10;
+    padding: 64px 24px 40px;
+    text-align: center;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(0,229,192,.1);
+    border: 1px solid rgba(0,229,192,.3);
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 22px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.4rem, 6vw, 4.2rem);
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    background: linear-gradient(135deg, #fff 30%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 14px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 15px;
+    font-weight: 300;
+    max-width: 460px;
+    margin: 0 auto 36px;
+    line-height: 1.6;
+  }
+
+  /* ── CONTROLS ── */
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 48px;
+    position: relative;
+    z-index: 10;
+    padding: 0 24px;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 0 1 320px;
+  }
+
+  .search-wrap svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  input[type="search"] {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 11px 16px 11px 42px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  input[type="search"]:focus { border-color: var(--accent); }
+  input[type="search"]::placeholder { color: var(--muted); }
+
+  .filter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    padding: 10px 18px;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .filter-btn:hover, .filter-btn.active {
+    background: rgba(0,229,192,.1);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── COUNT ── */
+  .count-bar {
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 5;
+  }
+  .count-bar span { color: var(--accent); font-weight: 600; }
+
+  /* ── GRID ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+    position: relative;
+    z-index: 5;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 26px 24px 22px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .25s, border-color .25s, box-shadow .25s, background .25s;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    animation: fadeUp .4s ease both;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    opacity: 0;
+    transition: opacity .25s;
+  }
+
+  .card:hover {
+    background: var(--hover-card);
+    border-color: rgba(0,229,192,.35);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0,0,0,.5), 0 0 0 1px rgba(0,229,192,.1);
+  }
+  .card:hover::before { opacity: 1; }
+
+  .card.hidden { display: none; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── CATEGORY TAG ── */
+  .cat {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 6px;
+    width: fit-content;
+  }
+  .cat-adas  { background: rgba(79,142,247,.12); color: #4f8ef7; border: 1px solid rgba(79,142,247,.25); }
+  .cat-legal { background: rgba(245,200,66,.1);  color: #f5c842; border: 1px solid rgba(245,200,66,.25); }
+  .cat-tech  { background: rgba(0,229,192,.1);   color: var(--accent); border: 1px solid rgba(0,229,192,.25); }
+  .cat-biz   { background: rgba(230,100,255,.1); color: #e664ff; border: 1px solid rgba(230,100,255,.25); }
+  .cat-ops   { background: rgba(255,140,60,.1);  color: #ff8c3c; border: 1px solid rgba(255,140,60,.25); }
+
+  /* ── ROLE TITLE ── */
+  .role {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    line-height: 1.25;
+    color: var(--text);
+  }
+
+  /* ── META ROW ── */
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12.5px;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .meta-item svg { flex-shrink: 0; }
+
+  /* ── SKILLS ── */
+  .skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .skill {
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 5px;
+    color: #a0aabf;
+    font-size: 11px;
+    font-weight: 500;
+    padding: 3px 9px;
+    letter-spacing: .02em;
+  }
+
+  /* ── REFER BTN ── */
+  .refer-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(0,229,192,.1);
+    border: 1px solid rgba(0,229,192,.3);
+    border-radius: 8px;
+    color: var(--accent);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 18px;
+    text-decoration: none;
+    transition: all .2s;
+    margin-top: auto;
+    width: fit-content;
+    position: relative;
+    z-index: 2;
+  }
+  .refer-btn:hover {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(0,229,192,.3);
+  }
+  .refer-btn:active { transform: scale(.97); }
+
+  /* ── EMPTY STATE ── */
+  .empty {
+    display: none;
+    text-align: center;
+    padding: 60px 24px;
+    color: var(--muted);
+    grid-column: 1/-1;
+  }
+  .empty svg { margin-bottom: 12px; opacity: .4; }
+  .empty p { font-size: 15px; }
+
+  /* ── MODAL OVERLAY ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s;
+  }
+  .modal-overlay.show {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ── MODAL BOX ── */
+  .modal {
+    background: var(--card);
+    border: 1px solid rgba(0,229,192,.25);
+    border-radius: 20px;
+    padding: 36px 32px 28px;
+    max-width: 420px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    transform: translateY(24px) scale(.96);
+    transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+    box-shadow: 0 32px 80px rgba(0,0,0,.6), 0 0 0 1px rgba(0,229,192,.1);
+  }
+  .modal-overlay.show .modal {
+    transform: translateY(0) scale(1);
+  }
+
+  .modal-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(0,229,192,.12);
+    border: 1px solid rgba(0,229,192,.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 18px;
+  }
+
+  .modal-role {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .modal h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--text);
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  .modal p {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 22px;
+  }
+
+  .modal-email {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(0,229,192,.07);
+    border: 1px solid rgba(0,229,192,.25);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 22px;
+  }
+
+  .modal-email span {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--accent);
+    letter-spacing: .01em;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-copy {
+    flex: 1;
+    background: rgba(0,229,192,.1);
+    border: 1px solid rgba(0,229,192,.3);
+    border-radius: 10px;
+    color: var(--accent);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 11px 16px;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn-copy:hover {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+  }
+
+  .btn-mail {
+    flex: 1;
+    background: rgba(79,142,247,.1);
+    border: 1px solid rgba(79,142,247,.3);
+    border-radius: 10px;
+    color: #4f8ef7;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 11px 16px;
+    text-decoration: none;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .btn-mail:hover {
+    background: #4f8ef7;
+    color: #fff;
+    border-color: #4f8ef7;
+  }
+
+  .btn-close {
+    position: absolute;
+    top: 14px; right: 14px;
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    cursor: pointer;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: all .2s;
+    line-height: 1;
+  }
+  .btn-close:hover { background: rgba(255,255,255,.1); color: var(--text); }
+
+  .copied-badge {
+    display: none;
+    font-size: 12px;
+    color: var(--accent);
+    margin-top: 10px;
+    font-weight: 600;
+  }
+  .copied-badge.show { display: block; }
+
+  /* ── REGION DIVIDER ── */
+  .region-divider {
+    grid-column: 1/-1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 12px 0 4px;
+  }
+  .region-divider span {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .region-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .cat-usa  { background: rgba(255,80,80,.1);   color: #ff6060; border: 1px solid rgba(255,80,80,.25); }
+  .cat-mid  { background: rgba(20,200,120,.1);  color: #14c878; border: 1px solid rgba(20,200,120,.25); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 520px) {
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge">🚀 KPIT is Hiring for MULTIPLE Positions in INDIA and USA</div>
+  <h1>Open Positions</h1>
+  <p class="subtitle">Explore opportunities across engineering, legal, and business functions. Refer a friend and grow together.</p>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="search" id="searchInput" placeholder="Search roles or skills…" autocomplete="off">
+  </div>
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="adas">ADAS</button>
+  <button class="filter-btn" data-filter="middleware">Middleware</button>
+  <button class="filter-btn" data-filter="tech">Tech &amp; Cloud</button>
+  <button class="filter-btn" data-filter="biz">Business</button>
+  <button class="filter-btn" data-filter="legal">Legal</button>
+  <button class="filter-btn" data-filter="ops">Operations</button>
+  <button class="filter-btn" data-filter="usa">🇺🇸 USA</button>
+</div>
+
+<div class="count-bar" id="countBar">Showing <span id="countNum">31</span> of 31 positions</div>
+
+<div class="grid" id="grid">
+
+  <!-- 1 -->
+  <div class="card" data-cat="legal" data-region="india" data-text="sr lead legal counsel legal drafting contract review pune">
+    <span class="cat cat-legal">⚖️ Legal</span>
+    <div class="role">Sr. Lead Legal Counsel</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>4 – 9 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">Legal Drafting</span>
+      <span class="skill">Contract Review</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Sr. Lead Legal Counsel')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 2 -->
+  <div class="card" data-cat="biz" data-region="india" data-text="marketing specialist technology marketing account-based marketing pune">
+    <span class="cat cat-biz">📣 Marketing</span>
+    <div class="role">Marketing Specialist</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>2 – 6 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">Technology Marketing</span>
+      <span class="skill">Account-Based Marketing</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Marketing Specialist')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 3 -->
+  <div class="card" data-cat="tech" data-region="india" data-text="devops azure aws cloud specialist ci/cd pipeline pune">
+    <span class="cat cat-tech">☁️ DevOps</span>
+    <div class="role">DevOps (Azure, AWS Cloud) Specialist</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>4 – 10 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">Azure Cloud</span>
+      <span class="skill">DevOps</span>
+      <span class="skill">CI/CD Pipeline</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'DevOps (Azure, AWS Cloud) Specialist')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 4 -->
+  <div class="card" data-cat="biz" data-region="india" data-text="pricing specialist ca pricing pune">
+    <span class="cat cat-biz">💰 Finance</span>
+    <div class="role">Pricing Specialist</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>5 – 10 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">CA</span>
+      <span class="skill">Pricing Strategy</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Pricing Specialist')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 5 -->
+  <div class="card" data-cat="adas" data-region="india" data-text="adas adaptive autosar architect c++ qnx bsp stl linux bangalore pune">
+    <span class="cat cat-adas">🚗 ADAS</span>
+    <div class="role">ADAS — Adaptive AUTOSAR Architect</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>9 – 15 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Bangalore / Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">C++</span>
+      <span class="skill">Adaptive AUTOSAR</span>
+      <span class="skill">QNX</span>
+      <span class="skill">BSP</span>
+      <span class="skill">STL</span>
+      <span class="skill">Linux</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'ADAS Adaptive AUTOSAR Architect')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 6 -->
+  <div class="card" data-cat="adas" data-region="india" data-text="adas classic autosar architect bsw os vector bangalore pune">
+    <span class="cat cat-adas">🚗 ADAS</span>
+    <div class="role">ADAS — Classic AUTOSAR Architect</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>9 – 15 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Bangalore / Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">AUTOSAR Classic</span>
+      <span class="skill">BSW</span>
+      <span class="skill">OS</span>
+      <span class="skill">Vector</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'ADAS Classic AUTOSAR Architect')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 7 -->
+  <div class="card" data-cat="tech" data-region="india" data-text="security operation analyst l2 mcafee trellix ens dlp palo alto cortex pune">
+    <span class="cat cat-tech">🔒 Security</span>
+    <div class="role">Security Operations Analyst — L2</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>3 – 7 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">McAfee / Trellix ENS</span>
+      <span class="skill">DLP</span>
+      <span class="skill">Palo Alto Cortex</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Security Operations Analyst L2')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 8 -->
+  <div class="card" data-cat="tech" data-region="india" data-text="networking cloud engineer aws azure pune">
+    <span class="cat cat-tech">🌐 Networking</span>
+    <div class="role">Networking / Cloud Engineer</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>4 – 10 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">AWS</span>
+      <span class="skill">Azure</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Networking / Cloud Engineer')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 9 -->
+  <div class="card" data-cat="biz" data-region="india" data-text="pre-sales consultant bid proposal management rfq pune">
+    <span class="cat cat-biz">🤝 Pre-Sales</span>
+    <div class="role">Pre-Sales Consultant</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>5 – 11 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">Pre-Sales</span>
+      <span class="skill">Bid Management</span>
+      <span class="skill">RFQ</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Pre-Sales Consultant')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 10 -->
+  <div class="card" data-cat="ops" data-region="india" data-text="procurement specialist procure to pay pune">
+    <span class="cat cat-ops">📦 Procurement</span>
+    <div class="role">Procurement Specialist</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>3 – 12 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">Procurement</span>
+      <span class="skill">Procure to Pay</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Procurement Specialist')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 11 -->
+  <div class="card" data-cat="adas" data-region="india" data-text="adas ai ml system development c++ python pytorch gpu embedded bangalore pune">
+    <span class="cat cat-adas">🤖 ADAS · AI/ML</span>
+    <div class="role">ADAS AI/ML System Development Expert</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>9 – 12 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Bangalore / Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">AI/ML</span>
+      <span class="skill">C++</span>
+      <span class="skill">Python</span>
+      <span class="skill">PyTorch</span>
+      <span class="skill">GPU / Embedded</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'ADAS AI/ML System Dev Expert')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 12 -->
+  <div class="card" data-cat="adas" data-region="india" data-text="adas ai architect ai framework llms python bangalore pune">
+    <span class="cat cat-adas">🧠 ADAS · AI</span>
+    <div class="role">ADAS AI Architect</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>9 – 12 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Bangalore / Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">AI Frameworks</span>
+      <span class="skill">LLMs</span>
+      <span class="skill">Python</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'ADAS AI Architect')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- INDIA REGION DIVIDER -->
+  <div class="region-divider"><span>🇮🇳 India — New Openings</span></div>
+
+  <!-- 13: ADAS Classic AUTOSAR Architect (updated) -->
+  <div class="card" data-cat="adas" data-region="india" data-text="adas classic autosar architect bsw os vector bangalore pune">
+    <span class="cat cat-adas">🚗 ADAS</span>
+    <div class="role">ADAS — Classic AUTOSAR Architect</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>9 – 15 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Bangalore / Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">AUTOSAR Classic Architecture</span>
+      <span class="skill">BSW</span>
+      <span class="skill">OS</span>
+      <span class="skill">Vector</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'ADAS Classic AUTOSAR Architect')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 14: ADAS Front-End Engineer -->
+  <div class="card" data-cat="adas" data-region="india" data-text="adas front-end engineer ai html5 css3 ui ux design ci/cd typescript bangalore pune">
+    <span class="cat cat-adas">🚗 ADAS · Frontend</span>
+    <div class="role">ADAS Front-End Engineer</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>4 – 10 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Bangalore / Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">AI</span>
+      <span class="skill">HTML5</span>
+      <span class="skill">CSS3</span>
+      <span class="skill">UI/UX Design</span>
+      <span class="skill">CI/CD</span>
+      <span class="skill">TypeScript</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'ADAS Front-End Engineer')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 15: ADAS Data Dog Backend Engineer -->
+  <div class="card" data-cat="adas" data-region="india" data-text="adas datadog backend engineer python docker aws cloud tableau power bi bangalore pune">
+    <span class="cat cat-adas">🚗 ADAS · Backend</span>
+    <div class="role">ADAS DataDog Backend Engineer</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>4 – 9 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Bangalore / Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">Python</span>
+      <span class="skill">Docker</span>
+      <span class="skill">AWS Cloud</span>
+      <span class="skill">Tableau</span>
+      <span class="skill">Power BI</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'ADAS DataDog Backend Engineer')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 16: Middleware AUTOSAR Security -->
+  <div class="card" data-cat="middleware" data-region="india" data-text="middleware autosar security csm secoc bangalore">
+    <span class="cat cat-mid">🔐 Middleware</span>
+    <div class="role">Middleware (SA) AUTOSAR Security</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>3 – 9 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Bangalore</span>
+    </div>
+    <div class="skills">
+      <span class="skill">AUTOSAR</span>
+      <span class="skill">CSM</span>
+      <span class="skill">SecOC</span>
+      <span class="skill">Security Stack</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Middleware AUTOSAR Security')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 17: Middleware AUTOSAR Ethernet -->
+  <div class="card" data-cat="middleware" data-region="india" data-text="middleware autosar ethernet doip some/ip ethernet switch ecu bangalore">
+    <span class="cat cat-mid">🔌 Middleware</span>
+    <div class="role">Middleware AUTOSAR Ethernet</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>3 – 9 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Bangalore</span>
+    </div>
+    <div class="skills">
+      <span class="skill">Ethernet</span>
+      <span class="skill">DoIP</span>
+      <span class="skill">SOME/IP</span>
+      <span class="skill">Ethernet Switch</span>
+      <span class="skill">ECU</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Middleware AUTOSAR Ethernet')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 18: Azure Infrastructure SME -->
+  <div class="card" data-cat="tech" data-region="india" data-text="azure infrastructure sme subject matter expert cloud sole optimus pune">
+    <span class="cat cat-tech">☁️ Azure</span>
+    <div class="role">Azure Infrastructure SME</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>10 – 15 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">Cloud</span>
+      <span class="skill">SOLE &amp; Optimus</span>
+      <span class="skill">Azure Infrastructure</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Azure Infrastructure SME')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 20: ADAS Python AWS Backend Lead -->
+  <div class="card" data-cat="adas" data-region="india" data-text="adas python aws backend lead bangalore pune">
+    <span class="cat cat-adas">🚗 ADAS · Backend</span>
+    <div class="role">ADAS Python AWS Backend Lead</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>5 – 9 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Bangalore / Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">Python</span>
+      <span class="skill">AWS</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'ADAS Python AWS Backend Lead')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 21: Middleware Adaptive AUTOSAR -->
+  <div class="card" data-cat="middleware" data-region="india" data-text="middleware adaptive autosar c++ qnx driveos driver bangalore">
+    <span class="cat cat-mid">⚙️ Middleware</span>
+    <div class="role">Middleware — Adaptive AUTOSAR</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>3 – 10 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Bangalore</span>
+    </div>
+    <div class="skills">
+      <span class="skill">Adaptive AUTOSAR</span>
+      <span class="skill">C++</span>
+      <span class="skill">QNX</span>
+      <span class="skill">DriveOS</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Middleware Adaptive AUTOSAR')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 22: Middleware Python Test Automation -->
+  <div class="card" data-cat="middleware" data-region="india" data-text="middleware python test automation etl sql api azure autosar bangalore">
+    <span class="cat cat-mid">🧪 Middleware</span>
+    <div class="role">Middleware Python Test Automation</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>3 – 6 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Bangalore</span>
+    </div>
+    <div class="skills">
+      <span class="skill">ETL</span>
+      <span class="skill">Python Automation</span>
+      <span class="skill">SQL</span>
+      <span class="skill">API</span>
+      <span class="skill">Azure</span>
+      <span class="skill">AUTOSAR</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Middleware Python Test Automation')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 23: Azure Infrastructure Specialist -->
+  <div class="card" data-cat="tech" data-region="india" data-text="azure infrastructure specialist ci/cd deployment pune india">
+    <span class="cat cat-tech">☁️ Azure</span>
+    <div class="role">Azure Infrastructure Specialist</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>5 – 10 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">Azure Infrastructure</span>
+      <span class="skill">CI/CD Deployment</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Azure Infrastructure Specialist')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 24: Java Expert -->
+  <div class="card" data-cat="tech" data-region="india" data-text="java expert angular spring boot microservices postgresql springboot quarkus pune">
+    <span class="cat cat-tech">☕ Java</span>
+    <div class="role">Java Expert — Angular / Spring Boot / Microservices</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>8 – 15 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Pune</span>
+    </div>
+    <div class="skills">
+      <span class="skill">Spring Boot</span>
+      <span class="skill">Quarkus</span>
+      <span class="skill">Microservices</span>
+      <span class="skill">Java</span>
+      <span class="skill">PostgreSQL</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Java Expert - Angular / Spring Boot / Microservices')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- USA REGION DIVIDER -->
+  <div class="region-divider"><span>🇺🇸 USA Region</span></div>
+
+  <!-- 25: US Jobs Requisition -->
+  <div class="card" data-cat="usa" data-region="usa" data-text="us jobs vehicle software engineering columbus detroit usa">
+    <span class="cat cat-usa">🇺🇸 USA</span>
+    <div class="role">US Jobs Requisition — Employee Referrals</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>2 – 20 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Columbus / Detroit</span>
+    </div>
+    <div class="skills">
+      <span class="skill">Vehicle Software Engineering</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'US Jobs Requisition')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 26: Vehicle Network Test Engineer -->
+  <div class="card" data-cat="usa" data-region="usa" data-text="vehicle network test engineer system engineer some/ip doip autosar pdu novi mi usa">
+    <span class="cat cat-usa">🇺🇸 USA</span>
+    <div class="role">Vehicle Network Test Engineer</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>7 – 12 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Novi, MI</span>
+    </div>
+    <div class="skills">
+      <span class="skill">System Engineer</span>
+      <span class="skill">SOME/IP</span>
+      <span class="skill">DoIP</span>
+      <span class="skill">AUTOSAR-PDU</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Vehicle Network Test Engineer')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 27: Software Integration Engineer -->
+  <div class="card" data-cat="usa" data-region="usa" data-text="software integration engineer qnx linux android c c++ aosp test automation autosar matlab can j1939 hil mil sil auburn hills mi usa">
+    <span class="cat cat-usa">🇺🇸 USA</span>
+    <div class="role">Software Integration Engineer — QNX / Linux / Android</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>6 – 10 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Auburn Hills, MI</span>
+    </div>
+    <div class="skills">
+      <span class="skill">C/C++</span>
+      <span class="skill">Linux / QNX</span>
+      <span class="skill">AOSP</span>
+      <span class="skill">Test Automation</span>
+      <span class="skill">AUTOSAR</span>
+      <span class="skill">Matlab</span>
+      <span class="skill">CAN / J1939</span>
+      <span class="skill">HIL / MIL / SIL</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Software Integration Engineer QNX/Linux/Android')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 28: Data Migration Hardening -->
+  <div class="card" data-cat="usa" data-region="usa" data-text="data migration hardening python java data handling git dearborn mi usa">
+    <span class="cat cat-usa">🇺🇸 USA</span>
+    <div class="role">Data Migration Hardening</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>3 – 6 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Dearborn, MI</span>
+    </div>
+    <div class="skills">
+      <span class="skill">Python</span>
+      <span class="skill">Java</span>
+      <span class="skill">Data Handling</span>
+      <span class="skill">Git</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Data Migration Hardening')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 29: Durability Simulation Engineer -->
+  <div class="card" data-cat="usa" data-region="usa" data-text="durability simulation engineer ansa abaqus nastran mbd simulation novi mi usa">
+    <span class="cat cat-usa">🇺🇸 USA</span>
+    <div class="role">Durability Simulation Engineer</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>8 – 15 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Novi, MI</span>
+    </div>
+    <div class="skills">
+      <span class="skill">ANSA</span>
+      <span class="skill">Abaqus</span>
+      <span class="skill">Nastran</span>
+      <span class="skill">MBD Simulation</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Durability Simulation Engineer')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 30: High Voltage Validation Engineer -->
+  <div class="card" data-cat="usa" data-region="usa" data-text="high voltage validation engineer calibration tool matlab simulink auburn hills mi usa">
+    <span class="cat cat-usa">🇺🇸 USA</span>
+    <div class="role">High Voltage Validation Engineer</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>2 – 5 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Auburn Hills, MI</span>
+    </div>
+    <div class="skills">
+      <span class="skill">High Voltage</span>
+      <span class="skill">Calibration Tool</span>
+      <span class="skill">Matlab / Simulink</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'High Voltage Validation Engineer')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- 31: Industrial Engineer -->
+  <div class="card" data-cat="usa" data-region="usa" data-text="industrial engineer most line balancing kaizens san antonio tx usa">
+    <span class="cat cat-usa">🇺🇸 USA</span>
+    <div class="role">Industrial Engineer</div>
+    <div class="meta">
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>2 – 4 Years</span>
+      <span class="meta-item"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>San Antonio, TX</span>
+    </div>
+    <div class="skills">
+      <span class="skill">MOST</span>
+      <span class="skill">Industrial Engineering</span>
+      <span class="skill">Line Balancing</span>
+      <span class="skill">Kaizens</span>
+    </div>
+    <a class="refer-btn" href="#" onclick="refer(event,'Industrial Engineer')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      Refer a Friend
+    </a>
+  </div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty" id="emptyState">
+    <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <p>No positions match your search.</p>
+  </div>
+</div>
+
+<!-- REFER MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="btn-close" onclick="closeModalDirect()">✕</button>
+    <div class="modal-icon">
+      <svg width="24" height="24" fill="none" stroke="#00e5c0" stroke-width="2" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+    </div>
+    <div class="modal-role" id="modalRole">Role Name</div>
+    <h2>Send Your Resume</h2>
+    <p>Please send the candidate's resume to the email below. Mention the role in the subject line for faster processing.</p>
+    <div class="modal-email">
+      <svg width="18" height="18" fill="none" stroke="#00e5c0" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span>surya.krishna@kpit.com</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-copy" onclick="copyEmail()">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copy Email
+      </button>
+      <a class="btn-mail" id="mailtoLink" href="#">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Open Mail
+      </a>
+    </div>
+    <div class="copied-badge" id="copiedBadge">✓ Email copied to clipboard!</div>
+  </div>
+</div>
+
+<script>
+  const cards = document.querySelectorAll('.card[data-cat]');
+  const filterBtns = document.querySelectorAll('.filter-btn');
+  const searchInput = document.getElementById('searchInput');
+  const countNum = document.getElementById('countNum');
+  const emptyState = document.getElementById('emptyState');
+
+  let activeFilter = 'all';
+  let searchQuery = '';
+
+  function update() {
+    let visible = 0;
+    cards.forEach((card) => {
+      const catMatch = activeFilter === 'all' || card.dataset.cat === activeFilter;
+      const textMatch = !searchQuery || card.dataset.text.includes(searchQuery.toLowerCase());
+      const show = catMatch && textMatch;
+      card.classList.toggle('hidden', !show);
+      if (show) {
+        card.style.animationDelay = (visible * 0.04) + 's';
+        visible++;
+      }
+    });
+
+    // Show/hide region dividers based on whether any card in that region is visible
+    document.querySelectorAll('.region-divider').forEach(div => {
+      let sib = div.nextElementSibling;
+      let anyVisible = false;
+      while (sib && !sib.classList.contains('region-divider') && !sib.classList.contains('empty')) {
+        if (!sib.classList.contains('hidden')) { anyVisible = true; break; }
+        sib = sib.nextElementSibling;
+      }
+      div.style.display = anyVisible ? '' : 'none';
+    });
+
+    countNum.textContent = visible;
+    emptyState.style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeFilter = btn.dataset.filter;
+      update();
+    });
+  });
+
+  searchInput.addEventListener('input', e => {
+    searchQuery = e.target.value.trim();
+    update();
+  });
+
+  function refer(e, role) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('modalRole').textContent = role;
+    document.getElementById('mailtoLink').href =
+      `mailto:surya.krishna@kpit.com?subject=Referral: ${encodeURIComponent(role)}&body=Hi Surya,%0A%0APlease find attached the resume for the ${encodeURIComponent(role)} position.%0A%0ARegards,`;
+    document.getElementById('copiedBadge').classList.remove('show');
+    document.getElementById('modalOverlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+  }
+
+  function closeModalDirect() {
+    document.getElementById('modalOverlay').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+
+  function copyEmail() {
+    navigator.clipboard?.writeText('surya.krishna@kpit.com').catch(() => {});
+    const badge = document.getElementById('copiedBadge');
+    badge.classList.add('show');
+    setTimeout(() => badge.classList.remove('show'), 2500);
+  }
+
+  // Close on Escape key
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModalDirect();
+  });
+</script>
+</body>
 </html>
